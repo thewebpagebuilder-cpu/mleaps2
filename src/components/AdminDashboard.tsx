@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Question, CandidateAssignment, ExamAttempt } from "@/db/schema";
 import { ScorecardView } from "./ScorecardView";
-import { CheckMark, CrossMark } from "./SixSigmaVisuals";
+import { CheckGlyph, CrossGlyph, Reveal, LuxeCard, CountUp, Magnetic } from "./Effects";
 import {
   Users,
   BookOpen,
@@ -53,7 +53,7 @@ export function AdminDashboard({
 
   const showToast = (text: string, type: "success" | "error" = "success") => {
     setToast({ text, type });
-    setTimeout(() => setToast((prev) => (prev?.text === text ? null : prev)), 4000);
+    setTimeout(() => setToast((p) => (p?.text === text ? null : p)), 4000);
   };
 
   const toLocalDateTimeInput = (d: Date) => {
@@ -63,7 +63,6 @@ export function AdminDashboard({
     )}:${pad(d.getMinutes())}`;
   };
 
-  // ---- assignment form ----
   const [newCandidateName, setNewCandidateName] = useState("");
   const [newCandidateEmail, setNewCandidateEmail] = useState("");
   const [newValidFrom, setNewValidFrom] = useState(() =>
@@ -163,7 +162,6 @@ export function AdminDashboard({
     }
   };
 
-  // ---- questions ----
   const [questionSearch, setQuestionSearch] = useState("");
   const [phaseFilter, setPhaseFilter] = useState("All");
   const [editingQuestion, setEditingQuestion] =
@@ -229,7 +227,9 @@ export function AdminDashboard({
       });
       if (res.ok) {
         showToast(
-          isEdit ? `Updated question #${safeNumber}.` : `Created question #${safeNumber}.`
+          isEdit
+            ? `Updated question #${safeNumber}.`
+            : `Created question #${safeNumber}.`
         );
         setEditingQuestion(null);
         await onRefreshData();
@@ -326,96 +326,72 @@ export function AdminDashboard({
   });
 
   const kpis = [
-    {
-      Icon: BookOpen,
-      label: "Question bank",
-      value: `${questions.length}`,
-      sub: "40 min · 70% pass",
-      tone: "text-[#c4530a] bg-[#fff6ec] border-[#f0d9bf]",
-    },
-    {
-      Icon: Users,
-      label: "Assigned candidates",
-      value: `${assignments.length}`,
-      sub: `${activeAssignmentsCount} active now`,
-      tone: "text-[#6d28d9] bg-[#f6f0ff] border-[#e2d4f5]",
-    },
-    {
-      Icon: Award,
-      label: "Completed attempts",
-      value: `${totalAttempts}`,
-      sub: `${passedCount} certified`,
-      tone: "text-emerald-700 bg-emerald-50 border-emerald-200",
-    },
-    {
-      Icon: BarChart3,
-      label: "Cohort average",
-      value: `${avgPercentage}%`,
-      sub: `${passRate}% pass rate`,
-      tone: "text-amber-700 bg-amber-50 border-amber-200",
-    },
+    { Icon: BookOpen, label: "Question bank", value: questions.length, sub: "40 min · 70% pass", suffix: "" },
+    { Icon: Users, label: "Assigned", value: assignments.length, sub: `${activeAssignmentsCount} active now`, suffix: "" },
+    { Icon: Award, label: "Attempts graded", value: totalAttempts, sub: `${passedCount} certified`, suffix: "" },
+    { Icon: BarChart3, label: "Cohort average", value: avgPercentage, sub: `${passRate}% pass rate`, suffix: "%" },
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-5 sm:px-8 py-10 space-y-8 reveal-up">
-      {/* toast */}
+    <div className="max-w-[1400px] mx-auto px-5 sm:px-8 py-10 space-y-8 relative z-10">
+      <div className="pointer-events-none fixed -top-52 -right-40 w-[600px] h-[600px] rounded-full bg-[#8b7bd8]/8 blur-[180px] anim-aurora-2" />
+
       {toast && (
         <div
-          className={`fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl border shadow-lg flex items-center gap-3 reveal-up bg-white ${
-            toast.type === "success" ? "border-emerald-200" : "border-rose-200"
+          className={`fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl border glass flex items-center gap-3 anim-pop ${
+            toast.type === "success"
+              ? "border-emerald-400/35"
+              : "border-rose-400/35"
           }`}
         >
           {toast.type === "success" ? (
-            <CheckMark className="w-5 h-5" />
+            <CheckGlyph className="w-5 h-5" />
           ) : (
-            <CrossMark className="w-5 h-5" />
+            <CrossGlyph className="w-5 h-5" />
           )}
-          <span className="text-sm font-medium text-[#15172a]">{toast.text}</span>
+          <span className="text-sm font-medium text-white">{toast.text}</span>
         </div>
       )}
 
-      {/* header + KPIs */}
       <div>
         <div className="flex flex-wrap items-end justify-between gap-4 mb-7">
           <div>
-            <span className="eyebrow text-[#c4530a]">Administration</span>
-            <h1 className="font-display text-3xl sm:text-4xl font-semibold text-[#15172a] mt-1">
-              Assessment control center
+            <span className="kicker text-[#d9b45b]">Administration</span>
+            <h1 className="font-display text-3xl sm:text-[2.5rem] font-extrabold mt-2 leading-tight">
+              <span className="text-white">Assessment </span>
+              <span className="foil-text">control center</span>
             </h1>
           </div>
           <button
             type="button"
             onClick={onRefreshData}
-            className="px-4 py-2.5 rounded-full bg-white border border-[#e8e4db] hover:border-[#cfc9bb] text-sm font-medium text-[#15172a] flex items-center gap-2 transition-all cursor-pointer"
+            className="px-4 py-2.5 rounded-full glass-deep hairline-gold text-sm font-medium text-white flex items-center gap-2 hover:border-[#d9b45b]/40 transition-all cursor-pointer"
           >
-            <RefreshCw className="w-4 h-4 text-[#c4530a]" /> Sync
+            <RefreshCw className="w-4 h-4 text-[#d9b45b]" /> Sync
           </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {kpis.map((k, i) => (
-            <div
-              key={k.label}
-              style={{ animationDelay: `${i * 70}ms` }}
-              className="count-up card-premium card-premium-hover rounded-2xl p-5 flex items-start justify-between"
-            >
-              <div>
-                <div className="eyebrow text-[#9a9a90]">{k.label}</div>
-                <div className="font-display text-3xl font-semibold text-[#15172a] mt-1.5">
-                  {k.value}
+            <Reveal key={k.label} delay={i * 70} y={18}>
+              <LuxeCard className="glass rounded-2xl p-5 h-full">
+                <div className="relative z-10 flex items-start justify-between">
+                  <div>
+                    <div className="kicker text-[#5d6881]">{k.label}</div>
+                    <div className="font-display text-3xl font-extrabold text-white mt-1.5">
+                      <CountUp to={k.value} suffix={k.suffix} />
+                    </div>
+                    <div className="text-xs text-[#6f7b94] mt-0.5">{k.sub}</div>
+                  </div>
+                  <div className="w-11 h-11 rounded-xl border border-[#d9b45b]/22 bg-[#d9b45b]/8 flex items-center justify-center text-[#d9b45b]">
+                    <k.Icon className="w-5 h-5" />
+                  </div>
                 </div>
-                <div className="text-xs text-[#747789] mt-0.5">{k.sub}</div>
-              </div>
-              <div
-                className={`w-11 h-11 rounded-xl border flex items-center justify-center ${k.tone}`}
-              >
-                <k.Icon className="w-5 h-5" />
-              </div>
-            </div>
+              </LuxeCard>
+            </Reveal>
           ))}
         </div>
 
-        {/* tabs */}
         <div className="flex flex-wrap items-center gap-2 mt-7">
           {(
             [
@@ -431,17 +407,17 @@ export function AdminDashboard({
                 key={t.id}
                 type="button"
                 onClick={() => setActiveTab(t.id)}
-                className={`px-5 py-2.5 rounded-full font-medium text-sm flex items-center gap-2 transition-all cursor-pointer ${
+                className={`sheen px-5 py-2.5 rounded-full font-medium text-sm flex items-center gap-2 transition-all cursor-pointer ${
                   isActive
-                    ? "bg-[#15172a] text-white shadow-sm"
-                    : "bg-white border border-[#e8e4db] text-[#6b6e80] hover:text-[#15172a]"
+                    ? "bg-gradient-to-r from-[#f3dca4] to-[#a8822f] text-[#0a0f1e] shadow-[0_8px_24px_-10px_rgba(217,180,91,.8)]"
+                    : "glass-deep text-[#8b95ad] hover:text-white"
                 }`}
               >
                 <Icon className="w-4 h-4" />
                 <span>{t.label}</span>
                 <span
                   className={`font-data px-1.5 py-0.5 rounded-full text-[11px] ${
-                    isActive ? "bg-white/20 text-white" : "bg-[#f4f2ec] text-[#6b6e80]"
+                    isActive ? "bg-[#0a0f1e]/20" : "bg-white/7"
                   }`}
                 >
                   {t.badge}
@@ -454,25 +430,25 @@ export function AdminDashboard({
 
       {/* ===== TAB 1 ===== */}
       {activeTab === "assignments" && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 fade-soft">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 anim-pop">
           <div className="lg:col-span-5">
             <form
               onSubmit={handleCreateAssignment}
-              className="card-premium rounded-3xl p-7 space-y-5 lg:sticky lg:top-28"
+              className="glass rounded-[26px] p-7 space-y-5 lg:sticky lg:top-28 edge-gold"
             >
               <div>
-                <span className="eyebrow text-[#c4530a]">New authorization</span>
-                <h2 className="font-display text-xl font-semibold text-[#15172a] mt-1">
+                <span className="kicker text-[#d9b45b]">New authorization</span>
+                <h2 className="font-display text-xl font-bold text-white mt-1.5">
                   Invite a candidate
                 </h2>
-                <p className="text-sm text-[#747789] mt-1">
-                  Only this email may sit the exam, strictly within the window
-                  you set.
+                <p className="text-sm text-[#8b95ad] mt-1">
+                  Only this address may sit the exam, strictly inside the window
+                  you define.
                 </p>
               </div>
 
               <div>
-                <label className="eyebrow text-[#9a9a90] block mb-1.5">
+                <label className="kicker text-[#5d6881] block mb-2">
                   Full name
                 </label>
                 <input
@@ -481,12 +457,12 @@ export function AdminDashboard({
                   value={newCandidateName}
                   onChange={(e) => setNewCandidateName(e.target.value)}
                   placeholder="e.g. Rohan Deshmukh"
-                  className="w-full px-4 py-3 rounded-xl bg-[#faf9f6] border border-[#e0dccf] text-sm focus:outline-none focus:border-[#e2630f] focus:bg-white transition-colors"
+                  className="w-full px-4 py-3 rounded-xl inset-dark text-sm focus:outline-none focus:border-[#d9b45b]/50 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="eyebrow text-[#9a9a90] block mb-1.5">
+                <label className="kicker text-[#5d6881] block mb-2">
                   Authorized email
                 </label>
                 <input
@@ -495,12 +471,12 @@ export function AdminDashboard({
                   value={newCandidateEmail}
                   onChange={(e) => setNewCandidateEmail(e.target.value)}
                   placeholder="name@company.com"
-                  className="w-full px-4 py-3 rounded-xl bg-[#faf9f6] border border-[#e0dccf] text-sm font-data focus:outline-none focus:border-[#e2630f] focus:bg-white transition-colors"
+                  className="w-full px-4 py-3 rounded-xl inset-dark text-sm font-data focus:outline-none focus:border-[#d9b45b]/50 transition-colors"
                 />
               </div>
 
               <div>
-                <span className="eyebrow text-[#9a9a90] block mb-2">
+                <span className="kicker text-[#5d6881] block mb-2">
                   Quick windows
                 </span>
                 <div className="grid grid-cols-2 gap-2">
@@ -514,7 +490,7 @@ export function AdminDashboard({
                       key={p.id}
                       type="button"
                       onClick={() => applyTimePreset(p.id as never)}
-                      className="px-3 py-2 rounded-xl bg-[#faf9f6] hover:bg-[#fff6ec] border border-[#e8e4db] hover:border-[#f0d9bf] text-xs font-medium text-[#15172a] transition-all cursor-pointer text-left"
+                      className="px-3 py-2 rounded-xl inset-dark hover:border-[#d9b45b]/35 text-xs font-medium text-white transition-all cursor-pointer text-left"
                     >
                       {p.label}
                     </button>
@@ -524,7 +500,7 @@ export function AdminDashboard({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="eyebrow text-[#9a9a90] block mb-1.5">
+                  <label className="kicker text-[#5d6881] block mb-2">
                     Opens
                   </label>
                   <input
@@ -532,11 +508,11 @@ export function AdminDashboard({
                     required
                     value={newValidFrom}
                     onChange={(e) => setNewValidFrom(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-[#faf9f6] border border-[#e0dccf] text-xs focus:outline-none focus:border-[#e2630f]"
+                    className="w-full px-3 py-2.5 rounded-xl inset-dark text-xs focus:outline-none focus:border-[#d9b45b]/50"
                   />
                 </div>
                 <div>
-                  <label className="eyebrow text-[#9a9a90] block mb-1.5">
+                  <label className="kicker text-[#5d6881] block mb-2">
                     Closes
                   </label>
                   <input
@@ -544,14 +520,14 @@ export function AdminDashboard({
                     required
                     value={newValidUntil}
                     onChange={(e) => setNewValidUntil(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-[#faf9f6] border border-[#e0dccf] text-xs focus:outline-none focus:border-[#e2630f]"
+                    className="w-full px-3 py-2.5 rounded-xl inset-dark text-xs focus:outline-none focus:border-[#d9b45b]/50"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="eyebrow text-[#9a9a90] block mb-1.5">
+                  <label className="kicker text-[#5d6881] block mb-2">
                     Minutes
                   </label>
                   <input
@@ -560,11 +536,11 @@ export function AdminDashboard({
                     max={180}
                     value={newDuration}
                     onChange={(e) => setNewDuration(Number(e.target.value))}
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#faf9f6] border border-[#e0dccf] text-sm focus:outline-none focus:border-[#e2630f]"
+                    className="w-full px-3.5 py-2.5 rounded-xl inset-dark text-sm focus:outline-none focus:border-[#d9b45b]/50"
                   />
                 </div>
                 <div>
-                  <label className="eyebrow text-[#9a9a90] block mb-1.5">
+                  <label className="kicker text-[#5d6881] block mb-2">
                     Cohort note
                   </label>
                   <input
@@ -572,7 +548,7 @@ export function AdminDashboard({
                     value={newNotes}
                     onChange={(e) => setNewNotes(e.target.value)}
                     placeholder="Batch A"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#faf9f6] border border-[#e0dccf] text-sm focus:outline-none focus:border-[#e2630f]"
+                    className="w-full px-3.5 py-2.5 rounded-xl inset-dark text-sm focus:outline-none focus:border-[#d9b45b]/50"
                   />
                 </div>
               </div>
@@ -580,7 +556,7 @@ export function AdminDashboard({
               <button
                 type="submit"
                 disabled={isCreatingAssignment}
-                className="w-full py-3.5 rounded-full font-medium text-sm text-white bg-[#15172a] hover:bg-[#242740] shadow-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="sheen w-full py-3.5 rounded-full font-bold text-sm text-[#0a0f1e] bg-gradient-to-r from-[#f3dca4] to-[#a8822f] flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
               >
                 <Plus className="w-4 h-4" />
                 {isCreatingAssignment ? "Assigning…" : "Authorize & schedule"}
@@ -589,12 +565,12 @@ export function AdminDashboard({
           </div>
 
           <div className="lg:col-span-7">
-            <div className="card-premium rounded-3xl p-6">
-              <h3 className="font-display text-lg font-semibold text-[#15172a] mb-1">
+            <div className="glass rounded-[26px] p-6">
+              <h3 className="font-display text-lg font-bold text-white mb-1">
                 Candidate roster ({assignments.length})
               </h3>
-              <p className="text-xs text-[#747789] mb-5">
-                Extend windows, allow retakes, or test a sign-in.
+              <p className="text-xs text-[#6f7b94] mb-5">
+                Extend windows, allow retakes, or simulate a candidate sign-in.
               </p>
 
               <div className="space-y-3.5">
@@ -613,128 +589,128 @@ export function AdminDashboard({
                   );
 
                   const badge = isActive
-                    ? { t: "Active", c: "bg-emerald-50 text-emerald-700 border-emerald-200" }
+                    ? { t: "Active", c: "bg-emerald-400/10 text-emerald-300 border-emerald-400/30" }
                     : isUpcoming
-                    ? { t: "Scheduled", c: "bg-amber-50 text-amber-700 border-amber-200" }
+                    ? { t: "Scheduled", c: "bg-amber-400/10 text-amber-300 border-amber-400/30" }
                     : isExpired
-                    ? { t: "Expired", c: "bg-rose-50 text-rose-700 border-rose-200" }
+                    ? { t: "Expired", c: "bg-rose-400/10 text-rose-300 border-rose-400/30" }
                     : {
                         t: matchingAttempt
                           ? `Completed · ${matchingAttempt.percentage}%`
                           : "Completed",
-                        c: "bg-violet-50 text-violet-700 border-violet-200",
+                        c: "bg-violet-400/10 text-violet-300 border-violet-400/30",
                       };
 
                   return (
-                    <div
-                      key={a.id}
-                      style={{ animationDelay: `${idx * 45}ms` }}
-                      className="reveal-up inset-panel rounded-2xl p-5 space-y-3"
-                    >
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
-                          <div className="flex items-center gap-2.5 flex-wrap">
-                            <h4 className="text-base font-semibold text-[#15172a]">
-                              {a.candidateName}
-                            </h4>
-                            <span
-                              className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${badge.c}`}
-                            >
-                              {badge.t}
-                            </span>
+                    <Reveal key={a.id} delay={idx * 45} y={16}>
+                      <div className="inset-dark rounded-2xl p-5 space-y-3 hover:border-[#d9b45b]/25 transition-colors">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <div className="flex items-center gap-2.5 flex-wrap">
+                              <h4 className="text-base font-bold text-white">
+                                {a.candidateName}
+                              </h4>
+                              <span
+                                className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${badge.c}`}
+                              >
+                                {badge.t}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs text-[#8b95ad] font-data mt-1">
+                              <Mail className="w-3.5 h-3.5 text-[#d9b45b]" />
+                              {a.candidateEmail}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1.5 text-xs text-[#6b6e80] font-data mt-1">
-                            <Mail className="w-3.5 h-3.5 text-[#c4530a]" />
-                            {a.candidateEmail}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              onTestCandidateEmail(a.candidateEmail, a.candidateName)
-                            }
-                            className="px-3 py-1.5 rounded-full bg-[#15172a] hover:bg-[#242740] text-white text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer"
-                          >
-                            Test <ExternalLink className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleDeleteAssignment(a.id, a.candidateEmail)
-                            }
-                            className="p-2 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-all cursor-pointer"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs bg-white rounded-xl p-3 border border-[#eceae4]">
-                        <div className="flex items-center gap-2 text-[#5b5e70]">
-                          <Calendar className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                          <span>
-                            <strong>From:</strong> {from.toLocaleString()}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 text-[#5b5e70]">
-                          <Clock className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                          <span>
-                            <strong>Until:</strong> {until.toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-[11px] text-[#9a9a90]">
-                          {a.notes || `Duration: ${a.durationMinutes} min`}
-                        </span>
-                        <div className="flex flex-wrap items-center gap-2">
-                          {(isExpired || isUpcoming) && (
+                          <div className="flex items-center gap-2">
                             <button
                               type="button"
                               onClick={() =>
-                                handleQuickAssignmentAction(a.id, "activate_now_48h")
+                                onTestCandidateEmail(a.candidateEmail, a.candidateName)
                               }
-                              className="px-2.5 py-1 rounded-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-xs font-medium transition-all cursor-pointer"
+                              className="sheen px-3 py-1.5 rounded-full bg-gradient-to-r from-[#f3dca4] to-[#a8822f] text-[#0a0f1e] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
                             >
-                              Activate 48h
+                              Test <ExternalLink className="w-3.5 h-3.5" />
                             </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleQuickAssignmentAction(a.id, "extend_24h")
-                            }
-                            className="px-2.5 py-1 rounded-full bg-white hover:bg-[#f4f2ec] border border-[#e0dccf] text-[#6b6e80] text-xs font-medium transition-all cursor-pointer"
-                          >
-                            +24h
-                          </button>
-                          {isCompleted && (
-                            <>
-                              {matchingAttempt && (
-                                <button
-                                  type="button"
-                                  onClick={() => setInspectingAttempt(matchingAttempt)}
-                                  className="px-2.5 py-1 rounded-full bg-violet-50 hover:bg-violet-100 border border-violet-200 text-violet-700 text-xs font-medium flex items-center gap-1 transition-all cursor-pointer"
-                                >
-                                  <Eye className="w-3 h-3" /> Score
-                                </button>
-                              )}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleDeleteAssignment(a.id, a.candidateEmail)
+                              }
+                              className="p-2 rounded-full bg-rose-400/10 hover:bg-rose-400/20 text-rose-300 border border-rose-400/25 transition-all cursor-pointer"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs bg-white/[0.02] rounded-xl p-3 border border-white/5">
+                          <div className="flex items-center gap-2 text-[#8b95ad]">
+                            <Calendar className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <span>
+                              <strong className="text-white/80">From:</strong>{" "}
+                              {from.toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-[#8b95ad]">
+                            <Clock className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                            <span>
+                              <strong className="text-white/80">Until:</strong>{" "}
+                              {until.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-[11px] text-[#5d6881]">
+                            {a.notes || `Duration: ${a.durationMinutes} min`}
+                          </span>
+                          <div className="flex flex-wrap items-center gap-2">
+                            {(isExpired || isUpcoming) && (
                               <button
                                 type="button"
                                 onClick={() =>
-                                  handleQuickAssignmentAction(a.id, "reset_retake")
+                                  handleQuickAssignmentAction(a.id, "activate_now_48h")
                                 }
-                                className="px-2.5 py-1 rounded-full bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 text-xs font-medium flex items-center gap-1 transition-all cursor-pointer"
+                                className="px-2.5 py-1 rounded-full bg-emerald-400/10 hover:bg-emerald-400/20 border border-emerald-400/30 text-emerald-300 text-xs font-medium transition-all cursor-pointer"
                               >
-                                <RotateCcw className="w-3 h-3" /> Retake
+                                Activate 48h
                               </button>
-                            </>
-                          )}
+                            )}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleQuickAssignmentAction(a.id, "extend_24h")
+                              }
+                              className="px-2.5 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-[#8b95ad] text-xs font-medium transition-all cursor-pointer"
+                            >
+                              +24h
+                            </button>
+                            {isCompleted && (
+                              <>
+                                {matchingAttempt && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setInspectingAttempt(matchingAttempt)}
+                                    className="px-2.5 py-1 rounded-full bg-violet-400/10 hover:bg-violet-400/20 border border-violet-400/30 text-violet-300 text-xs font-medium flex items-center gap-1 transition-all cursor-pointer"
+                                  >
+                                    <Eye className="w-3 h-3" /> Score
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleQuickAssignmentAction(a.id, "reset_retake")
+                                  }
+                                  className="px-2.5 py-1 rounded-full bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/30 text-amber-300 text-xs font-medium flex items-center gap-1 transition-all cursor-pointer"
+                                >
+                                  <RotateCcw className="w-3 h-3" /> Retake
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </Reveal>
                   );
                 })}
               </div>
@@ -745,12 +721,12 @@ export function AdminDashboard({
 
       {/* ===== TAB 2 ===== */}
       {activeTab === "questions" && (
-        <div className="space-y-6 fade-soft">
-          <div className="card-premium rounded-3xl p-6">
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+        <div className="space-y-6 anim-pop">
+          <div className="glass rounded-[26px] p-6 edge-gold">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
               <div>
-                <span className="eyebrow text-[#c4530a]">Master key</span>
-                <h3 className="font-display text-lg font-semibold text-[#15172a]">
+                <span className="kicker text-[#d9b45b]">Master key</span>
+                <h3 className="font-display text-lg font-bold text-white mt-1">
                   Answer key — tap a cell to edit
                 </h3>
               </div>
@@ -758,47 +734,64 @@ export function AdminDashboard({
                 <button
                   type="button"
                   onClick={handleRestoreDefaultQuestions}
-                  className="px-3.5 py-2 rounded-full bg-white border border-[#e8e4db] hover:border-[#cfc9bb] text-xs font-medium text-[#6b6e80] flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="px-3.5 py-2 rounded-full glass-deep hairline-gold text-xs font-medium text-[#8b95ad] hover:text-white flex items-center gap-1.5 transition-all cursor-pointer"
                 >
-                  <RotateCcw className="w-3.5 h-3.5 text-[#c4530a]" /> Restore 25
+                  <RotateCcw className="w-3.5 h-3.5 text-[#d9b45b]" /> Restore 25
                 </button>
-                <button
-                  type="button"
+                <Magnetic
                   onClick={openNewQuestionModal}
-                  className="px-4 py-2 rounded-full bg-[#15172a] hover:bg-[#242740] text-white font-medium text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                  className="sheen px-4 py-2 rounded-full bg-gradient-to-r from-[#f3dca4] to-[#a8822f] text-[#0a0f1e] font-bold text-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" /> Add question
-                </button>
+                </Magnetic>
               </div>
             </div>
-            <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-13 gap-2">
-              {questions.map((q) => (
+            {questions.length === 0 ? (
+              <div className="p-8 rounded-2xl inset-dark border border-[#d9b45b]/30 bg-[#d9b45b]/5 text-center my-3">
+                <div className="font-display text-lg font-bold text-white mb-2">
+                  No questions currently loaded
+                </div>
+                <p className="text-xs text-[#8b95ad] mb-4">
+                  Click below to restore all 25 official Six Sigma Green Belt mock exam questions and answer keys.
+                </p>
                 <button
-                  key={q.id}
                   type="button"
-                  onClick={() => setEditingQuestion(q)}
-                  className="p-2 rounded-xl bg-[#faf9f6] hover:bg-[#fff6ec] border border-[#e8e4db] hover:border-[#f0d9bf] text-center transition-all cursor-pointer group"
+                  onClick={handleRestoreDefaultQuestions}
+                  className="px-5 py-2.5 rounded-full bg-gradient-to-r from-[#f3dca4] via-[#d9b45b] to-[#a8822f] text-[#0a0f1e] font-bold text-xs inline-flex items-center gap-2 shadow-lg cursor-pointer"
                 >
-                  <div className="text-[10px] text-[#9a9a90]">
-                    Q{q.questionNumber}
-                  </div>
-                  <div className="font-display text-base font-bold text-[#c4530a] group-hover:scale-110 transition-transform">
-                    {q.correctOption}
-                  </div>
+                  <RotateCcw className="w-3.5 h-3.5" /> Restore 25 Questions
                 </button>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-13 gap-2">
+                {questions.map((q) => (
+                  <button
+                    key={q.id}
+                    type="button"
+                    onClick={() => setEditingQuestion(q)}
+                    className="p-2 rounded-xl inset-dark hover:border-[#d9b45b]/45 text-center transition-all cursor-pointer group"
+                  >
+                    <div className="text-[10px] text-[#5d6881]">
+                      Q{q.questionNumber}
+                    </div>
+                    <div className="font-display text-base font-bold foil-text group-hover:scale-110 transition-transform">
+                      {q.correctOption}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="relative flex-1 min-w-[260px]">
-              <Search className="w-4 h-4 text-[#9a9a90] absolute left-4 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-[#5d6881] absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={questionSearch}
                 onChange={(e) => setQuestionSearch(e.target.value)}
                 placeholder="Search questions, options, concepts…"
-                className="w-full pl-11 pr-4 py-3 rounded-full bg-white border border-[#e8e4db] text-sm focus:outline-none focus:border-[#e2630f]"
+                className="w-full pl-11 pr-4 py-3 rounded-full glass-deep text-sm focus:outline-none focus:border-[#d9b45b]/45"
               />
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -810,8 +803,8 @@ export function AdminDashboard({
                     onClick={() => setPhaseFilter(phase)}
                     className={`px-3.5 py-2 rounded-full text-xs font-medium transition-all cursor-pointer ${
                       phaseFilter === phase
-                        ? "bg-[#15172a] text-white"
-                        : "bg-white border border-[#e8e4db] text-[#6b6e80] hover:text-[#15172a]"
+                        ? "bg-gradient-to-r from-[#f3dca4] to-[#a8822f] text-[#0a0f1e] font-bold"
+                        : "glass-deep text-[#8b95ad] hover:text-white"
                     }`}
                   >
                     {phase}
@@ -822,86 +815,91 @@ export function AdminDashboard({
           </div>
 
           <div className="space-y-4">
-            {filteredQuestions.map((q) => (
-              <div key={q.id} className="card-premium card-premium-hover rounded-3xl p-6">
-                <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <span className="font-data text-sm font-semibold text-[#9a9a90]">
-                      #{q.questionNumber}
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-violet-50 border border-violet-200 text-violet-700 text-xs font-medium">
-                      {q.dmaicPhase}
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-medium">
-                      Key: {q.correctOption}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setEditingQuestion(q)}
-                      className="px-3.5 py-1.5 rounded-full bg-[#f4f2ec] hover:bg-[#15172a] hover:text-white text-[#15172a] text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" /> Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteQuestion(q)}
-                      className="p-2 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-all cursor-pointer"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
+            {filteredQuestions.map((q, i) => (
+              <Reveal key={q.id} delay={Math.min(i * 30, 240)} y={16}>
+                <LuxeCard tilt={2.5} className="glass rounded-[24px] p-6">
+                  <div className="relative z-10">
+                    <div className="flex flex-wrap items-start justify-between gap-4 mb-3">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <span className="font-data text-sm font-bold text-[#d9b45b]">
+                          #{q.questionNumber}
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-violet-400/10 border border-violet-400/25 text-violet-300 text-xs font-medium">
+                          {q.dmaicPhase}
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-400/10 border border-emerald-400/25 text-emerald-300 text-xs font-medium">
+                          Key: {q.correctOption}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setEditingQuestion(q)}
+                          className="px-3.5 py-1.5 rounded-full bg-white/6 hover:bg-[#d9b45b] hover:text-[#0a0f1e] text-white text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" /> Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteQuestion(q)}
+                          className="p-2 rounded-full bg-rose-400/10 hover:bg-rose-400/20 text-rose-300 border border-rose-400/25 transition-all cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
 
-                <h4 className="font-display text-lg font-semibold text-[#15172a] mb-4">
-                  {q.questionText}
-                </h4>
+                    <h4 className="font-display text-lg font-bold text-white mb-4">
+                      {q.questionText}
+                    </h4>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
-                  {(
-                    [
-                      { letter: "A", text: q.optionA },
-                      { letter: "B", text: q.optionB },
-                      { letter: "C", text: q.optionC },
-                      { letter: "D", text: q.optionD },
-                    ] as const
-                  ).map((opt) => {
-                    const isCorrect = q.correctOption.toUpperCase() === opt.letter;
-                    return (
-                      <div
-                        key={opt.letter}
-                        className={`p-3 rounded-xl border text-sm flex items-center justify-between gap-2 ${
-                          isCorrect
-                            ? "bg-emerald-50 border-emerald-300 text-[#15172a] font-medium"
-                            : "bg-[#faf9f6] border-[#e8e4db] text-[#6b6e80]"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <span
-                            className={`w-6 h-6 rounded-lg flex items-center justify-center font-data font-bold text-xs ${
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
+                      {(
+                        [
+                          { letter: "A", text: q.optionA },
+                          { letter: "B", text: q.optionB },
+                          { letter: "C", text: q.optionC },
+                          { letter: "D", text: q.optionD },
+                        ] as const
+                      ).map((opt) => {
+                        const isCorrect =
+                          q.correctOption.toUpperCase() === opt.letter;
+                        return (
+                          <div
+                            key={opt.letter}
+                            className={`p-3 rounded-xl border text-sm flex items-center justify-between gap-2 ${
                               isCorrect
-                                ? "bg-emerald-500 text-white"
-                                : "bg-[#f4f2ec] text-[#6b6e80]"
+                                ? "bg-emerald-400/10 border-emerald-400/35 text-white font-medium"
+                                : "inset-dark text-[#8b95ad]"
                             }`}
                           >
-                            {opt.letter}
-                          </span>
-                          <span>{opt.text}</span>
-                        </div>
-                        {isCorrect && (
-                          <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                            <div className="flex items-center gap-2.5">
+                              <span
+                                className={`w-6 h-6 rounded-lg flex items-center justify-center font-data font-bold text-xs ${
+                                  isCorrect
+                                    ? "bg-emerald-400 text-[#04070f]"
+                                    : "bg-white/6 text-[#8b95ad]"
+                                }`}
+                              >
+                                {opt.letter}
+                              </span>
+                              <span>{opt.text}</span>
+                            </div>
+                            {isCorrect && (
+                              <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
 
-                <div className="inset-panel rounded-xl p-3 text-sm text-[#5b5e70]">
-                  <strong className="text-[#15172a]">Explanation: </strong>
-                  {q.explanation}
-                </div>
-              </div>
+                    <div className="inset-dark rounded-xl p-3 text-sm text-[#8b95ad]">
+                      <strong className="text-white">Explanation: </strong>
+                      {q.explanation}
+                    </div>
+                  </div>
+                </LuxeCard>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -909,36 +907,36 @@ export function AdminDashboard({
 
       {/* ===== TAB 3 ===== */}
       {activeTab === "scores" && (
-        <div className="fade-soft">
-          <div className="card-premium rounded-3xl p-6 sm:p-8">
+        <div className="anim-pop">
+          <div className="glass rounded-[26px] p-6 sm:p-8">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
               <div>
-                <span className="eyebrow text-[#c4530a]">Evaluation ledger</span>
-                <h2 className="font-display text-xl font-semibold text-[#15172a]">
+                <span className="kicker text-[#d9b45b]">Evaluation ledger</span>
+                <h2 className="font-display text-xl font-bold text-white mt-1.5">
                   Candidate scores
                 </h2>
               </div>
               <div className="relative min-w-[260px]">
-                <Search className="w-4 h-4 text-[#9a9a90] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-[#5d6881] absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={scoreSearch}
                   onChange={(e) => setScoreSearch(e.target.value)}
                   placeholder="Filter by name or email…"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-full bg-[#faf9f6] border border-[#e8e4db] text-xs focus:outline-none focus:border-[#e2630f]"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-full inset-dark text-xs focus:outline-none focus:border-[#d9b45b]/45"
                 />
               </div>
             </div>
 
             {filteredAttempts.length === 0 ? (
-              <div className="text-center py-14 text-[#9a9a90]">
+              <div className="text-center py-14 text-[#5d6881]">
                 No candidate attempts match your filter.
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-[#eceae4] eyebrow text-[#9a9a90]">
+                    <tr className="border-b border-white/8 kicker text-[#5d6881]">
                       <th className="py-3.5 px-4">Candidate</th>
                       <th className="py-3.5 px-4">Email</th>
                       <th className="py-3.5 px-4">Score</th>
@@ -948,24 +946,29 @@ export function AdminDashboard({
                       <th className="py-3.5 px-4 text-right">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#eceae4] text-sm">
+                  <tbody className="divide-y divide-white/6 text-sm">
                     {filteredAttempts.map((att) => (
-                      <tr key={att.id} className="hover:bg-[#faf9f6] transition-colors">
-                        <td className="py-4 px-4 font-semibold text-[#15172a]">
+                      <tr
+                        key={att.id}
+                        className="hover:bg-white/[0.03] transition-colors"
+                      >
+                        <td className="py-4 px-4 font-semibold text-white">
                           {att.candidateName}
                         </td>
-                        <td className="py-4 px-4 text-xs text-[#6b6e80] font-data">
+                        <td className="py-4 px-4 text-xs text-[#8b95ad] font-data">
                           {att.candidateEmail}
                         </td>
                         <td className="py-4 px-4">
                           <div className="flex items-center gap-2">
-                            <span className="font-data font-semibold text-[#15172a]">
+                            <span className="font-data font-bold text-white">
                               {att.percentage}%
                             </span>
-                            <div className="w-16 h-1.5 bg-[#eceae4] rounded-full overflow-hidden">
+                            <div className="w-16 h-1.5 bg-white/8 rounded-full overflow-hidden">
                               <div
                                 className={`h-full rounded-full ${
-                                  att.passed ? "bg-emerald-500" : "bg-rose-400"
+                                  att.passed
+                                    ? "bg-gradient-to-r from-emerald-400 to-emerald-500"
+                                    : "bg-gradient-to-r from-rose-400 to-amber-400"
                                 }`}
                                 style={{ width: `${att.percentage}%` }}
                               />
@@ -974,20 +977,20 @@ export function AdminDashboard({
                         </td>
                         <td className="py-4 px-4">
                           {att.passed ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-400/10 text-emerald-300 border border-emerald-400/30">
                               <Check className="w-3.5 h-3.5" /> Pass
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-400/10 text-rose-300 border border-rose-400/30">
                               <AlertCircle className="w-3.5 h-3.5" /> Below 70%
                             </span>
                           )}
                         </td>
-                        <td className="py-4 px-4 text-xs text-[#6b6e80] font-data">
+                        <td className="py-4 px-4 text-xs text-[#8b95ad] font-data">
                           {Math.floor(att.timeSpentSeconds / 60)}m{" "}
                           {att.timeSpentSeconds % 60}s
                         </td>
-                        <td className="py-4 px-4 text-xs text-[#9a9a90]">
+                        <td className="py-4 px-4 text-xs text-[#5d6881]">
                           {new Date(att.submittedAt).toLocaleDateString(
                             undefined,
                             { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }
@@ -997,7 +1000,7 @@ export function AdminDashboard({
                           <button
                             type="button"
                             onClick={() => setInspectingAttempt(att)}
-                            className="px-3.5 py-2 rounded-full bg-[#15172a] hover:bg-[#242740] text-white font-medium text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer"
+                            className="sheen px-3.5 py-2 rounded-full bg-gradient-to-r from-[#f3dca4] to-[#a8822f] text-[#0a0f1e] font-bold text-xs inline-flex items-center gap-1.5 transition-all cursor-pointer"
                           >
                             <Eye className="w-3.5 h-3.5" /> Inspect
                           </button>
@@ -1012,19 +1015,18 @@ export function AdminDashboard({
         </div>
       )}
 
-      {/* ===== QUESTION MODAL ===== */}
+      {/* ===== MODAL ===== */}
       {editingQuestion && (
-        <div className="fixed inset-0 z-50 bg-[#15172a]/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto fade-soft">
+        <div className="fixed inset-0 z-50 bg-[#04070f]/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto anim-pop">
           <form
             onSubmit={handleSaveQuestion}
-            className="card-premium max-w-2xl w-full rounded-3xl overflow-hidden my-8"
+            className="glass max-w-2xl w-full rounded-[26px] overflow-hidden my-8 edge-gold"
           >
-            <div className="h-1 rule-accent" />
             <div className="p-7 sm:p-8 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[#eceae4]">
+              <div className="flex items-center justify-between pb-3 border-b border-white/8">
                 <div>
-                  <span className="eyebrow text-[#c4530a]">Question editor</span>
-                  <h3 className="font-display text-xl font-semibold text-[#15172a]">
+                  <span className="kicker text-[#d9b45b]">Question editor</span>
+                  <h3 className="font-display text-xl font-bold text-white mt-1">
                     {editingQuestion.id
                       ? `Edit question #${editingQuestion.questionNumber}`
                       : "New question"}
@@ -1033,7 +1035,7 @@ export function AdminDashboard({
                 <button
                   type="button"
                   onClick={() => setEditingQuestion(null)}
-                  className="p-2 rounded-full bg-[#f4f2ec] hover:bg-[#ebe8e0] text-[#6b6e80] cursor-pointer"
+                  className="p-2 rounded-full bg-white/6 hover:bg-white/12 text-[#8b95ad] cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1041,7 +1043,7 @@ export function AdminDashboard({
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="eyebrow text-[#9a9a90] block mb-1">No.</label>
+                  <label className="kicker text-[#5d6881] block mb-1.5">No.</label>
                   <input
                     type="number"
                     required
@@ -1054,11 +1056,11 @@ export function AdminDashboard({
                           : undefined,
                       })
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#faf9f6] border border-[#e0dccf] text-sm focus:outline-none focus:border-[#e2630f]"
+                    className="w-full px-3.5 py-2.5 rounded-xl inset-dark text-sm focus:outline-none focus:border-[#d9b45b]/50"
                   />
                 </div>
                 <div>
-                  <label className="eyebrow text-[#9a9a90] block mb-1">
+                  <label className="kicker text-[#5d6881] block mb-1.5">
                     Phase
                   </label>
                   <select
@@ -1069,7 +1071,7 @@ export function AdminDashboard({
                         dmaicPhase: e.target.value,
                       })
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#faf9f6] border border-[#e0dccf] text-sm focus:outline-none focus:border-[#e2630f]"
+                    className="w-full px-3.5 py-2.5 rounded-xl inset-dark text-sm focus:outline-none focus:border-[#d9b45b]/50"
                   >
                     {["Define", "Measure", "Analyze", "Improve", "Control"].map(
                       (p) => (
@@ -1081,7 +1083,7 @@ export function AdminDashboard({
                   </select>
                 </div>
                 <div>
-                  <label className="eyebrow text-emerald-600 block mb-1">
+                  <label className="kicker text-emerald-400 block mb-1.5">
                     Correct key
                   </label>
                   <select
@@ -1092,7 +1094,7 @@ export function AdminDashboard({
                         correctOption: e.target.value,
                       })
                     }
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-700 font-semibold text-sm focus:outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-emerald-400/10 border border-emerald-400/35 text-emerald-300 font-bold text-sm focus:outline-none"
                   >
                     <option value="A">A</option>
                     <option value="B">B</option>
@@ -1103,7 +1105,7 @@ export function AdminDashboard({
               </div>
 
               <div>
-                <label className="eyebrow text-[#9a9a90] block mb-1">
+                <label className="kicker text-[#5d6881] block mb-1.5">
                   Question stem
                 </label>
                 <textarea
@@ -1116,7 +1118,7 @@ export function AdminDashboard({
                       questionText: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#faf9f6] border border-[#e0dccf] text-sm focus:outline-none focus:border-[#e2630f]"
+                  className="w-full px-4 py-2.5 rounded-xl inset-dark text-sm focus:outline-none focus:border-[#d9b45b]/50"
                 />
               </div>
 
@@ -1130,12 +1132,10 @@ export function AdminDashboard({
                   const isCorrect = editingQuestion.correctOption === letter;
                   return (
                     <div key={letter}>
-                      <label className="flex items-center justify-between eyebrow text-[#9a9a90] mb-1">
+                      <label className="flex items-center justify-between kicker text-[#5d6881] mb-1.5">
                         <span>Option {letter}</span>
                         {isCorrect && (
-                          <span className="text-emerald-600 normal-case tracking-normal">
-                            ★ correct
-                          </span>
+                          <span className="text-emerald-400">★ correct</span>
                         )}
                       </label>
                       <input
@@ -1148,10 +1148,10 @@ export function AdminDashboard({
                             [fieldKey]: e.target.value,
                           })
                         }
-                        className={`w-full px-3.5 py-2.5 rounded-xl bg-[#faf9f6] border text-sm focus:outline-none ${
+                        className={`w-full px-3.5 py-2.5 rounded-xl inset-dark text-sm focus:outline-none ${
                           isCorrect
-                            ? "border-emerald-400"
-                            : "border-[#e0dccf] focus:border-[#e2630f]"
+                            ? "border-emerald-400/50"
+                            : "focus:border-[#d9b45b]/50"
                         }`}
                       />
                     </div>
@@ -1160,7 +1160,7 @@ export function AdminDashboard({
               </div>
 
               <div>
-                <label className="eyebrow text-[#9a9a90] block mb-1">
+                <label className="kicker text-[#5d6881] block mb-1.5">
                   Explanation
                 </label>
                 <textarea
@@ -1173,22 +1173,22 @@ export function AdminDashboard({
                     })
                   }
                   placeholder="Why is the correct option right?"
-                  className="w-full px-4 py-2.5 rounded-xl bg-[#faf9f6] border border-[#e0dccf] text-sm focus:outline-none focus:border-[#e2630f]"
+                  className="w-full px-4 py-2.5 rounded-xl inset-dark text-sm focus:outline-none focus:border-[#d9b45b]/50"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#eceae4]">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/8">
                 <button
                   type="button"
                   onClick={() => setEditingQuestion(null)}
-                  className="px-5 py-2.5 rounded-full bg-[#f4f2ec] hover:bg-[#ebe8e0] text-[#6b6e80] text-sm font-medium cursor-pointer"
+                  className="px-5 py-2.5 rounded-full bg-white/6 hover:bg-white/12 text-[#8b95ad] text-sm font-medium cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSavingQuestion}
-                  className="px-6 py-2.5 rounded-full bg-[#15172a] hover:bg-[#242740] text-white font-medium text-sm flex items-center gap-2 cursor-pointer"
+                  className="sheen px-6 py-2.5 rounded-full bg-gradient-to-r from-[#f3dca4] to-[#a8822f] text-[#0a0f1e] font-bold text-sm flex items-center gap-2 cursor-pointer disabled:opacity-60"
                 >
                   <Save className="w-4 h-4" />
                   {isSavingQuestion ? "Saving…" : "Save question"}
