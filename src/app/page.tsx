@@ -51,8 +51,8 @@ export default function AssessmentPlatform() {
   const [attempts, setAttempts] = useState<ExamAttempt[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
-  const [emailInput, setEmailInput] = useState("alex.rivera@mleaps.com");
-  const [nameInput, setNameInput] = useState("Alex Rivera");
+  const [emailInput, setEmailInput] = useState("fake.candidate@mleaps.com");
+  const [nameInput, setNameInput] = useState("Demo Candidate (Fake Profile)");
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] =
     useState<VerificationResult | null>(null);
@@ -185,9 +185,16 @@ export default function AssessmentPlatform() {
 
   const presets = [
     {
+      email: "fake.candidate@mleaps.com",
+      name: "Demo Candidate (Fake Profile)",
+      label: "Fake Profile · Active 48h",
+      Icon: CircleCheck,
+      tone: "text-amber-800 border-amber-300 bg-amber-50/90 font-bold",
+    },
+    {
       email: "alex.rivera@mleaps.com",
       name: "Alex Rivera",
-      label: "Active window",
+      label: "Active 48h window",
       Icon: CircleCheck,
       tone: "text-emerald-700 border-emerald-200 bg-emerald-50/60",
     },
